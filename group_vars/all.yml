@@ -1,12 +1,27 @@
 access_key: AKIA2H4EUPO5KTHG7WMZ
 secret_key: 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
+
 key_name: aws
 pub_key: "/home/keeper/.ssh/aws.pub"
+
 region: ca-central-1
+
+elb_zones:
+- ca-central-1a
+- ca-central-1b
+- ca-central-1d
 image: ami-0e28822503eeedddc
-id: "syn-app01-06"
+
+id: "syn-app07"
+
 sec_group: "{{ id }}-sec"
+
 server_hostname: syn-app01
+
 db_name: hello_django
 db_user: hello_django
 db_pass: hello_django
+
+allowed_ips:
+- 76.64.154.176/32
+- 24.56.34.25/32

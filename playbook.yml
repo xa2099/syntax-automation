@@ -26,8 +26,13 @@
           ports:
             - 22
             - 8000
-          cidr_ip: 0.0.0.0/0
+          cidr_ip: "{{ allowed_ips }}"
+            
     register: result_sec_group
+
+  - name: Sec Group Info
+    debug:
+      msg: "{{ result_sec_group }}"
 
   - name: Provision EC2.
     ec2:
@@ -45,7 +50,7 @@
 
   - name: EC2 Info
     debug:
-      msg: "Public IP: {{ result_ec2.instances[0].public_ip }}"
+      msg: "{{ result_ec2 }}"
 
   - name: Add new instance to host group.
     add_host:
@@ -78,8 +83,28 @@
 
   # - name: RDS Info
   #   debug:
-  #     msg: "Endpoint: {{ result_rds.instance.endpoint }}" 
-    
+  #     msg: "{{ result_rds }}"
+
+  - name: Create Load Balancer.
+    ec2_elb_lb:
+      aws_access_key: "{{ access_key }}"
+      aws_secret_key: "{{ secret_key }}"
+      name: "{{ id }}-lb"
+      region: "{{ region }}"
+      state: present
+      instance_ids: "{{ result_ec2.instances[0].id }}"
+      zones: "{{ elb_zones }}"
+      listeners:
+        - protocol: http
+          load_balancer_port: 80
+          instance_port: 8000
+          # ssl_certificate_id: "arn:aws:iam::123456789012:server-certificate/company/servercerts/ProdServerCert"
+    register: result_elb
+
+  - name: ELB Info
+    debug:
+      msg: "{{ result_elb }}"
+
 - hosts: appserver
   become: yes
   gather_facts: no
