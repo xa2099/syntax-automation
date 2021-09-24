@@ -1,0 +1,99 @@
+---
+
+- hosts: localhost
+  connection: local
+  gather_facts: no
+
+  tasks:
+
+  - name: Upload public key to AWS.
+    ec2_key:
+      aws_access_key: "{{ access_key }}"
+      aws_secret_key: "{{ secret_key }}"
+      name:           "{{ key_name }}"
+      key_material:   "{{ lookup('file', '{{ pub_key }}') }}"
+      region:         "{{ region }}"
+
+  - name: Create security group.
+    ec2_group:
+      aws_access_key: "{{ access_key }}"
+      aws_secret_key: "{{ secret_key }}"
+      name:           "{{ sec_group }}"
+      description:    "For {{ id }}"
+      region:         "{{ region }}"
+      rules:
+        - proto: tcp
+          ports:
+            - 22
+            - 8000
+          cidr_ip: 0.0.0.0/0
+    register: result_sec_group
+
+  - name: Provision EC2.
+    ec2:
+      aws_access_key: "{{ access_key }}"
+      aws_secret_key: "{{ secret_key }}"
+      key_name: "{{ key_name }}"
+      id: "{{ id }}"
+      group_id: "{{ result_sec_group.group_id }}"
+      image: "{{ image }}"
+      instance_type: t2.micro
+      region: "{{ region }}"
+      wait: true
+      count: 1
+    register: result_ec2
+
+  - name: EC2 Info
+    debug:
+      msg: "Public IP: {{ result_ec2.instances[0].public_ip }}"
+
+  - name: Add new instance to host group.
+    add_host:
+      hostname: "{{ item.public_ip }}"
+      groupname: appserver
+    loop: "{{ result_ec2.instances }}"
+
+  - name: Wait for SSH to come up
+    wait_for:
+      host: "{{ item.public_dns_name }}"
+      port: 22
+      state: started
+    loop: "{{ result_ec2.instances }}"
+
+  # - name: Provision Postgress
+  #   rds:
+  #     aws_access_key: "{{ access_key }}"
+  #     aws_secret_key: "{{ secret_key }}"
+  #     region: "{{ region }}"
+  #     command: create
+  #     instance_name: "{{ id }}"
+  #     db_engine: postgres
+  #     port: 5432
+  #     instance_type: db.r5.large
+  #     size: 10
+  #     db_name: "{{ db_name }}"
+  #     username: "{{ db_user }}"
+  #     password: "{{ db_pass }}"
+  #   register: result_rds
+
+  # - name: RDS Info
+  #   debug:
+  #     msg: "Endpoint: {{ result_rds.instance.endpoint }}" 
+    
+- hosts: appserver
+  become: yes
+  gather_facts: no
+
+  tasks:
+
+  - name: Remame server.
+    shell:
+      cmd: "hostnamectl set-hostname {{ server_hostname }}"
+
+  - name: Setup Docker and Docker Compose.
+    include_role:
+      name: docker
+
+  # - name: Copy Docker file and Compose.
+  #   include_role:
+  #     name: app

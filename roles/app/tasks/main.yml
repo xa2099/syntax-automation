@@ -1,0 +1,16 @@
+---
+
+- name: Creates /tmp/syntax directory.
+  file:
+    path: /tmp/syntax
+    state: directory
+
+- name: Copy Docker Compose file.
+  get_url:
+    url: https://gist.githubusercontent.com/yassineselmi/1d929dced4e069fb338b2b4fbd8c5a0e/raw/3f7090dc3c80c4a4167014767d5847ea141a1f27/docker-compose-django.example.yml
+    dest: "/tmp/syntax/docker-compose.yml"
+    force: yes
+
+- name: Deploy Docker Compose stack.
+  shell:
+    cmd: "docker-compose -f /tmp/syntax/docker-compose.yml up -d"
