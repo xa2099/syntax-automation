@@ -65,25 +65,25 @@
       state: started
     loop: "{{ result_ec2.instances }}"
 
-  # - name: Provision Postgress
-  #   rds:
-  #     aws_access_key: "{{ access_key }}"
-  #     aws_secret_key: "{{ secret_key }}"
-  #     region: "{{ region }}"
-  #     command: create
-  #     instance_name: "{{ id }}"
-  #     db_engine: postgres
-  #     port: 5432
-  #     instance_type: db.r5.large
-  #     size: 10
-  #     db_name: "{{ db_name }}"
-  #     username: "{{ db_user }}"
-  #     password: "{{ db_pass }}"
-  #   register: result_rds
+  - name: Provision Postgress
+    rds:
+      aws_access_key: "{{ access_key }}"
+      aws_secret_key: "{{ secret_key }}"
+      region: "{{ region }}"
+      command: create
+      instance_name: "{{ id }}"
+      db_engine: postgres
+      port: 5432
+      instance_type: db.r5.large
+      size: 10
+      db_name: "{{ db_name }}"
+      username: "{{ db_user }}"
+      password: "{{ db_pass }}"
+    register: result_rds
 
-  # - name: RDS Info
-  #   debug:
-  #     msg: "{{ result_rds }}"
+  - name: RDS Info
+    debug:
+      msg: "{{ result_rds }}"
 
   - name: Create Load Balancer.
     ec2_elb_lb:
@@ -119,6 +119,6 @@
     include_role:
       name: docker
 
-  # - name: Copy Docker file and Compose.
-  #   include_role:
-  #     name: app
+  - name: Copy Docker file and Compose.
+    include_role:
+      name: app
