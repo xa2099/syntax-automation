@@ -97,7 +97,6 @@
         - protocol: http
           load_balancer_port: 80
           instance_port: 8000
-          # ssl_certificate_id: "arn:aws:iam::123456789012:server-certificate/company/servercerts/ProdServerCert"
     register: result_elb
 
   - name: ELB Info
