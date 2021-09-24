@@ -27,7 +27,6 @@
             - 22
             - 8000
           cidr_ip: "{{ allowed_ips }}"
-            
     register: result_sec_group
 
   - name: Sec Group Info

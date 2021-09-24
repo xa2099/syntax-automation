@@ -12,7 +12,7 @@ elb_zones:
 - ca-central-1d
 image: ami-0e28822503eeedddc
 
-id: "syn-app07"
+id: "syn-app01"
 
 sec_group: "{{ id }}-sec"
 
