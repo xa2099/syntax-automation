@@ -91,7 +91,7 @@
       name: "{{ id }}-lb"
       region: "{{ region }}"
       state: present
-      instance_ids: "{{ result_ec2.instances[0].id }}"
+      instance_ids: "{{ result_ec2.instance_ids }}"
       zones: "{{ elb_zones }}"
       listeners:
         - protocol: http
